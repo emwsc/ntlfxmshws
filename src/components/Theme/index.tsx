@@ -8,16 +8,16 @@ const Theme = () => (
           --space-cadet: hsla(235, 35%, 26%, 1);
           --cool-grey: hsla(218, 19%, 68%, 1);
           --cultured: hsla(197, 3%, 96%, 1);
-          --bright-navy-blue: #2D7DD2;
-          --maximum-blue-purple: #B4ADEA;
-          --vivid-sky-blue: #5ADBFF;
-          --jonquil: #F7CB15;
-          --white: #FFFFFF;
+          --bright-navy-blue: #2d7dd2;
+          --maximum-blue-purple: #b4adea;
+          --vivid-sky-blue: #5adbff;
+          --jonquil: #f7cb15;
+          --white: #ffffff;
           --graish: #515259;
-          --bg-graish: #F4F8FE;
-          --bluish: #B9D1F4;
+          --cornflower: #91a6ff;
+          --bg-graish: #f4f8fe;
+          --bluish: #b9d1f4;
           --netflix: #e50914;
-          --isabelline: #f2edeb;
           --font-size-xxl: 20px;
           --font-size-l: 16px;
           --font-size-m: 14px;
@@ -53,6 +53,10 @@ const Theme = () => (
         .text_centered {
           display: flex;
           align-items: center;
+        }
+
+        .bold {
+          font-weight: bold;
         }
       `}
     </style>

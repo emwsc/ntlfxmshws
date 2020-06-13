@@ -1,23 +1,42 @@
-import { ViewingAcitivityContent } from "../../logic/viewingActivityParser/types";
+import { viewingActivityContent, ShowWithViewingActivity } from "../../logic";
 
-export type STAGES = 'PARSING' | 'SEARCHING' | 'SENDING';
+export type STAGES = "PARSING" | "SEARCHING" | "SENDING";
 
 export type ProcessorProps = {
-    textContent: string;
-}
+  textContent: string;
+};
+
+type Progress = {
+  current: number;
+  max: number;
+};
+
+export type ProcessorStateProps = Progress & {
+  children: React.ReactNode;
+};
 
 export type State = {
-    textContent: string,
-    stage: STAGES,
-    parsingStatistic: {
-        parsedCount: number;
-        totalRecords: number;
-    }
-    viewingActivityContent: ViewingAcitivityContent[] | null;
-}
+  textContent: string;
+  stage: STAGES;
+  parsingStatistic: Progress;
+  searchingStatistic: Progress;
+  foundStatistic: Progress;
+  viewingActivityContent: viewingActivityContent[] | null;
+  processedShows: ShowWithViewingActivity[];
+};
 
-export type SetParsingStatistic = {type: 'SET_PARSING_STATISTIC', payload: State["parsingStatistic"] }
-export type SwitchStage = {type: 'SWITCH_STAGE', payload: STAGES}
-export type SetViewingActivityContent = {type: 'SET_VIEWING_ACTIVITY_CONTENT', payload: ViewingAcitivityContent[]}
+export type SetStatistic = {
+  type: "SET_STATISTIC";
+  payload: {
+    statistic: Progress;
+    prop: "foundStatistic" | "parsingStatistic" | "searchingStatistic";
+  };
+};
+export type SwitchStage = { type: "SWITCH_STAGE"; payload: STAGES };
+export type SetViewingActivityContent = {
+  type: "SET_VIEWING_ACTIVITY_CONTENT";
+  payload: viewingActivityContent[];
+};
+export type AddProcessedShow = { type: "ADD_PROCESSED_SHOW", payload: Show };
 
-export type Action = SetParsingStatistic | SwitchStage | SetViewingActivityContent;
+export type Action = SetStatistic | SwitchStage | SetViewingActivityContent | AddProcessedShow;

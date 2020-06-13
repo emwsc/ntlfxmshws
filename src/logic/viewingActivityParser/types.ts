@@ -10,12 +10,12 @@ export type Season = {
   episodes: string[];
 }
 
-export type ViewingAcitivityContent = {
+export type viewingActivityContent = {
     showTitle: string;
     seasons: Season[];
 };
 
-export type ViewingAcitivityParseResponse = {
+export type viewingActivityParseResponse = {
   status: "SUCCESS" | "ERROR" | "BAD_FILE";
-  content: ViewingAcitivityContent[];
+  content: viewingActivityContent[];
 };

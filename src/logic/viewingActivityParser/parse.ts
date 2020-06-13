@@ -2,8 +2,8 @@ import { SHOW_META_SPLIT_LENGTH, SEASON_SLUGS, CHUNK_SIZE } from "./constants";
 
 import {
   ParsedMeta,
-  ViewingAcitivityContent,
-  ViewingAcitivityParseResponse,
+  viewingActivityContent,
+  viewingActivityParseResponse,
 } from "./types";
 
 const splitLine = (line: string) => {
@@ -70,10 +70,10 @@ const parseChunk = (lines: string[]) => {
   return result;
 };
 
-export const parse = (text: string): ViewingAcitivityParseResponse => {
+export const parse = (text: string): viewingActivityParseResponse => {
   try {
     const lines = text.split("\n");
-    const result: { [key: string]: ViewingAcitivityContent } = {};
+    const result: { [key: string]: viewingActivityContent } = {};
     for (let i = 1; i < lines.length; i++) {
       const meta = splitLine(lines[i]);
       const parsedMeta = parseMeta(meta.show);
@@ -124,7 +124,7 @@ const chunk = (array: any[], start: number) => {
 export const parseChunking = (
   text: string,
   onProgress: (current: number, max: number) => void
-): Promise<ViewingAcitivityParseResponse> => {
+): Promise<viewingActivityParseResponse> => {
   return new Promise((resolve, reject) => {
     const lines = text.split("\n");
     let processedCounter = 1;

@@ -1,3 +1,5 @@
+import { viewingActivityContent } from "../viewingActivityParser"
+
 export type Episode = {
     id: string;
     title: string;
@@ -5,6 +7,7 @@ export type Episode = {
     episodeNumber: number;
     shortName: number;
     showId: number;
+    image: string;
 }
 
 export type Network = {
@@ -17,4 +20,9 @@ export type Show = {
     id: string;
     episodes: Episode[];
     network: Network;
+    image: string;
+}
+
+export type ShowWithViewingActivity = Show & {
+    viewingActivity: viewingActivityContent
 }

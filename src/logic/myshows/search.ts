@@ -1,6 +1,7 @@
 import { MYSHOWS_API_URL, NETFLIX_NETWORK } from "./constants";
 
-import { Show } from "./types";
+import { Show, ShowWithViewingActivity } from "./types";
+import { viewingActivityContent } from "../viewingActivityParser/types";
 
 const prepareSearchRequestBody = (query: string) => {
   const data = {
@@ -32,8 +33,52 @@ const searchMyshows = async (query: string): Promise<Show[]> => {
   }
 };
 
+const filterShows = (shows) => {
+  const netflixShows =
+    shows.length === 1
+      ? shows
+      : shows.filter(
+          (show) => !!show.network && show.network.title === NETFLIX_NETWORK
+        );
+  return netflixShows;
+};
+
 export const search = async (query: string): Promise<Show[]> => {
   const shows = await searchMyshows(query);
-  const netflixShows =  shows.filter(show => show.network.title === NETFLIX_NETWORK);
+  const netflixShows = filterShows(shows);
   return netflixShows;
+};
+
+export const searchByChunks = async (
+  content: viewingActivityContent[],
+  onSearchProgress: (current: number, max: number) => void,
+  onFoundProgress: (shows: ShowWithViewingActivity[]) => void
+): Promise<void> => {
+  return new Promise((resolve) => {
+    const max = content.length;
+    let current = 0;
+    const next = () => {
+      if (content.length === 0) {
+        return resolve();
+      }
+      const foundShows: ShowWithViewingActivity[] = [];
+      const chunks = content.splice(
+        0,
+        content.length < 10 ? content.length : 10
+      );
+      const promises = chunks.map((chunk) => search(chunk.showTitle));
+      Promise.all(promises).then((results) => {
+        results.forEach((shows, index) => {
+          filterShows(shows).forEach((show) =>
+            foundShows.push({ ...show, viewingActivity: { ...chunks[index] } })
+          );
+        });
+        current += chunks.length;
+        onSearchProgress(current, max);
+        onFoundProgress(foundShows);
+        next();
+      });
+    };
+    next();
+  });
 };
