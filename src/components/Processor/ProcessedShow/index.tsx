@@ -5,6 +5,25 @@ import { setShowStatus, syncEpisodes } from "../../../logic";
 
 import { CHANGE_STATUS_SHOW_STATES } from "./types";
 
+import acitivtyLottieIcon from "./assets/activity.json";
+import { LottieIcon } from "../../LottieIcon";
+
+const STATUS_COLOR: {[key in CHANGE_STATUS_SHOW_STATES]: string} = {
+  'INIT': 'transparent',
+  'CHANGING': 'transparent',
+  'SUCCESS': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(50,150,93,0.6446779395351891) 60%, rgba(50,150,93,1) 75%);',
+  'FAILED': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(229,9,20,1) 60%, rgba(229,9,20,1) 75%);'
+}
+
+const ChangingState = () => (
+  <>
+    <div>Загружаем на MyShows</div>
+    <div className="show__icon">
+      <LottieIcon animationData={acitivtyLottieIcon} />
+    </div>
+  </>
+);
+
 export const ProcessedShow = ({
   titleOriginal,
   image,
@@ -65,15 +84,16 @@ export const ProcessedShow = ({
           </button>
         </div>
         <div className="show__state">
-          {showStatus === "CHANGING" && <div></div>}
-          {showStatus === "SUCCESS" && 'Статус шоу изменен на "Смотрю"'}
+          {showStatus === "CHANGING" && <ChangingState />}
+          {showStatus === "SUCCESS" &&
+            'Найденные серии помечены и статус шоу изменен на "Смотрю"'}
           {showStatus === "FAILED" &&
-            "Не удалось изменить статус шоу на MyShows"}
+            "Что-то пошло не так. Возможно серии уже помечены как просмотренные."}
         </div>
       </div>
+      <div className="show__status-color" />
       <style jsx>{`
         .show {
-          padding: 25px;
           box-sizing: border-box;
           display: flex;
           align-items: center;
@@ -89,10 +109,11 @@ export const ProcessedShow = ({
           position: relative;
           background-color: var(--graish);
           color: var(--white);
-          opacity: 0;
-          animation: fadeIn 0.25s ease;
-          animation-delay: 0.2s;
-          animation-fill-mode: forwards;
+        }
+
+        .show__icon {
+          width: 30px;
+          height: 30px;
         }
 
         .show__content {
@@ -104,6 +125,18 @@ export const ProcessedShow = ({
           align-items: center;
           justify-content: space-between;
           width: 100%;
+          padding: 25px;
+          box-sizing: border-box;
+          border-radius: 20px;
+          height: 100%;
+        }
+
+        .show__status-color {
+          border-radius: 0 20px 20px 0;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          background: ${STATUS_COLOR[showStatus]};
         }
 
         .show__title {
@@ -115,6 +148,10 @@ export const ProcessedShow = ({
         }
         .show__state {
           grid-area: state;
+          display: flex;
+          font-size: var(--font-size-s);
+          align-items: center;
+          justify-content: space-between;
         }
 
         .show__buttons {
@@ -135,15 +172,6 @@ export const ProcessedShow = ({
           background-position: top;
           background-repeat: no-repeat;
           opacity: 0.45;
-        }
-
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
         }
       `}</style>
     </div>

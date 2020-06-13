@@ -1,7 +1,11 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
+import { LottieIcon } from "../LottieIcon";
+
 import { DropzoneProps } from "./types";
+
+import uploadIconLottie from './assets/upload.json';
 
 const DragBeforeUpload = () => {
   const onLinkClick = useCallback(
@@ -13,11 +17,9 @@ const DragBeforeUpload = () => {
 
   return (
     <div className="dropzone__before-upload">
-      <img
-        className="dropzone__upload-icon"
-        alt="Загрузка"
-        src="/icons/folder-upload-fill.svg"
-      />
+      <div className='dropzone__upload-icon'>
+        <LottieIcon animationData={uploadIconLottie} speed={0.5} />
+      </div>
       <p className="title dropzone__title">
         Загрузите .csv файл с историей просмотров{" "}
         <span className="netflix">Netflix</span>

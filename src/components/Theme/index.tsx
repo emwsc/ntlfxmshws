@@ -18,6 +18,7 @@ const Theme = () => (
           --bg-graish: #f4f8fe;
           --bluish: #b9d1f4;
           --netflix: #e50914;
+          --greenish: #32965D;
           --font-size-xxl: 20px;
           --font-size-l: 16px;
           --font-size-m: 14px;

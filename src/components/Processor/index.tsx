@@ -39,10 +39,10 @@ const ProcessorState = ({ children, current, max }: ProcessorStateProps) => (
 
       .processor__content {
         position: relative;
-        z-index: 2;
+        z-index: 3;
       }
 
-      .processor:after {
+      .processor:before {
         content: "";
         position: absolute;
         z-index: 1;
