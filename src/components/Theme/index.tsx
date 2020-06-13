@@ -71,6 +71,11 @@ const Theme = () => (
           transition: all 0.1s linear;
         }
 
+        .button:disabled {
+          background: var(--cool-grey);
+          color: var(--graish);
+        }
+
         .button:focus {
           border: 5px solid var(--bright-navy-blue);
         }
@@ -87,6 +92,15 @@ const Theme = () => (
         .button_inverse {
           background: #000;
           color: var(--white);
+        }
+
+        .link {
+          color: var(--white);
+          display: block;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          text-decoration: none;
         }
       `}
     </style>

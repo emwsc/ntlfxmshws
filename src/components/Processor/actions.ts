@@ -1,16 +1,17 @@
 import {
   SetStatistic,
-  State,
+  ProcessorState,
   STAGES,
   SwitchStage,
   SetViewingActivityContent,
   AddProcessedShow,
+  ChangeUploadAllState,
 } from "./types";
 import { viewingActivityContent, Show, ShowWithViewingActivity } from "../../logic";
 
 export const setStatistic = (
   prop: SetStatistic["payload"]["prop"],
-  statistic: State["parsingStatistic"]
+  statistic: ProcessorState["parsingStatistic"]
 ): SetStatistic => ({
   type: "SET_STATISTIC",
   payload: {
@@ -35,3 +36,8 @@ export const addProcessedShow = (payload: ShowWithViewingActivity): AddProcessed
   type: "ADD_PROCESSED_SHOW",
   payload,
 });
+
+export const changeUploadAllState = (payload: ProcessorState['uploadAllState']): ChangeUploadAllState => ({
+  type: 'CHANGE_UPLOAD_ALL_STATE',
+  payload
+})

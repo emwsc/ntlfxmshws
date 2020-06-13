@@ -1,8 +1,8 @@
-import React, { useEffect, useReducer, Fragment } from "react";
+import React, { useEffect, useReducer, Fragment, useCallback } from "react";
 
 import { ProcessedShow } from "../ProcessedShow";
 
-import { ProcessorProps, State, ProcessorStateProps } from "./types";
+import { ProcessorProps, ProcessorState, ProcessorStateProps } from "./types";
 
 import { parseChunking, searchByChunks } from "../../logic";
 import {
@@ -10,12 +10,13 @@ import {
   switchStage,
   setViewingActivityContent,
   addProcessedShow,
+  changeUploadAllState,
 } from "./actions";
 import { reducer, getInitialState } from "./reducer";
 
 import { styleProcessorStages } from "./styles";
 
-const ProcessorState = ({ children, current, max }: ProcessorStateProps) => (
+const ProcessContainer = ({ children, current, max }: ProcessorStateProps) => (
   <div className="processor">
     <div className="processor__content">{children}</div>
     <style jsx>{`
@@ -60,8 +61,11 @@ const ProcessorState = ({ children, current, max }: ProcessorStateProps) => (
 
 const ParsingState = ({
   parsingStatistic,
-}: Pick<State, "parsingStatistic">) => (
-  <ProcessorState current={parsingStatistic.current} max={parsingStatistic.max}>
+}: Pick<ProcessorState, "parsingStatistic">) => (
+  <ProcessContainer
+    current={parsingStatistic.current}
+    max={parsingStatistic.max}
+  >
     <p className="title processor__title">
       {
         <span>
@@ -73,7 +77,7 @@ const ParsingState = ({
       Обработано {parsingStatistic.current} из {parsingStatistic.max}
     </p>
     <style jsx>{styleProcessorStages}</style>
-  </ProcessorState>
+  </ProcessContainer>
 );
 
 const SearchingState = ({
@@ -81,10 +85,10 @@ const SearchingState = ({
   searchingStatistic,
   foundStatistic,
 }: Pick<
-  State,
+  ProcessorState,
   "viewingActivityContent" | "searchingStatistic" | "foundStatistic"
 >) => (
-  <ProcessorState
+  <ProcessContainer
     current={searchingStatistic.current}
     max={searchingStatistic.max}
   >
@@ -114,7 +118,7 @@ const SearchingState = ({
         margin-top: 4px;
       }
     `}</style>
-  </ProcessorState>
+  </ProcessContainer>
 );
 
 /**
@@ -130,6 +134,8 @@ export const Processor = ({ textContent }: ProcessorProps) => {
     searchingStatistic,
     foundStatistic,
     processedShows,
+    uploadAllState,
+    stage,
   } = state;
 
   useEffect(() => {
@@ -161,9 +167,13 @@ export const Processor = ({ textContent }: ProcessorProps) => {
           });
         }
       ).then(() => {
-        dispatch(switchStage("SENDING"));
+        dispatch(switchStage("DONE"));
       });
     });
+  }, []);
+
+  const handleUploadAllAsItIs = useCallback(() => {
+    dispatch(changeUploadAllState("UPLOADING_AS_IT_IS"));
   }, []);
 
   return (
@@ -179,11 +189,23 @@ export const Processor = ({ textContent }: ProcessorProps) => {
       {processedShows.length > 0 && (
         <>
           <h2>Найденные шоу</h2>
-          <button className="button button_inverse">Автоматически загрузить все данные о просмотренных шоу как получится</button>
-          <button className="button button_inverse">Пометить все как посмотренные целиком</button>
+          <p className="text disclaimer">
+            Нет гарантии, что получится найти корректно отметить все серии, потому что
+            выгрузка из <span className="netflix bold">Netflix</span> не очень
+            детально размечена. Так что как получится как получится.
+          </p>
+          <div className="buttons">
+            <button
+              className="button button_inverse"
+              onClick={handleUploadAllAsItIs}
+              disabled={stage !== "DONE"}
+            >
+              Загрузить все данные о просмотренных шоу как получится
+            </button>
+          </div>
           {processedShows.map((show) => (
             <Fragment key={show.id}>
-              <ProcessedShow {...show} />
+              <ProcessedShow {...show} uploadAllState={uploadAllState} />
             </Fragment>
           ))}
         </>
@@ -197,6 +219,17 @@ export const Processor = ({ textContent }: ProcessorProps) => {
           margin: 50px 0;
           width: 100%;
           justify-items: center;
+        }
+
+        .disclaimer {
+          max-width: 800px;
+          text-align: center;
+        }
+
+        .buttons {
+          display: grid;
+          grid-gap: 5px;
+          grid-template-columns: repeat(2, auto);
         }
       `}</style>
     </div>

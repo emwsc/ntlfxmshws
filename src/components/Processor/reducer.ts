@@ -1,11 +1,11 @@
-import { Action, State } from "./types";
+import { Action, ProcessorState } from "./types";
 
 const initialProgress = {
   current: 0,
   max: 0,
 }
 
-export const getInitialState = (textContent: string): State => {
+export const getInitialState = (textContent: string): ProcessorState => {
   return {
     textContent,
     stage: "PARSING",
@@ -13,12 +13,16 @@ export const getInitialState = (textContent: string): State => {
     parsingStatistic: initialProgress,
     searchingStatistic: initialProgress,
     foundStatistic: initialProgress,
-    processedShows: []
+    processedShows: [],
+    uploadAllState: 'INIT'
   };
 };
 
-export const reducer = (state: State, action: Action): State => {
+export const reducer = (state: ProcessorState, action: Action): ProcessorState => {
   switch (action.type) {
+    case 'CHANGE_UPLOAD_ALL_STATE': {
+      return {...state, uploadAllState: action.payload}
+    }
     case 'ADD_PROCESSED_SHOW':{
       const nextProcessedShows = [...state.processedShows];
       nextProcessedShows.push({...action.payload});

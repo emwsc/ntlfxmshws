@@ -10,25 +10,13 @@ import {
   setShowStatus,
   syncEpisodes,
 } from "../../logic";
+import { HOVER_ICON_STYLE, STATUS_COLOR, MY_SHOWS_SHOW_URL } from "./constants";
 
 import { CHANGE_STATUS_SHOW_STATES } from "./types";
+import { ProcessorState } from "../Processor/types";
 
 import acitivtyLottieIcon from "./assets/activity.json";
 import checkmarkLottieIcon from "./assets/checkmark.json";
-
-
-const STATUS_COLOR: {[key in CHANGE_STATUS_SHOW_STATES]: string} = {
-  'INIT': 'transparent',
-  'CHANGING': 'transparent',
-  'SUCCESS': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(50,150,93,0.6446779395351891) 60%, rgba(50,150,93,1) 75%);',
-  'FAILED': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(229,9,20,1) 60%, rgba(229,9,20,1) 75%);'
-}
-
-const hoverIconStyle = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-};
 
 const ChangingState = () => (
   <>
@@ -39,12 +27,28 @@ const ChangingState = () => (
   </>
 );
 
+const ProcessedShowStates: { [key in CHANGE_STATUS_SHOW_STATES]: React.FC } = {
+  INIT: () => null,
+  CHANGING: () => <ChangingState />,
+  SUCCESS: () => (
+    <span>Найденные серии помечены и статус шоу изменен на "Смотрю"</span>
+  ),
+  FAILED: () => (
+    <span>
+      Что-то пошло не так. Возможно серии уже помечены как просмотренные.
+    </span>
+  ),
+};
+
 export const ProcessedShow = ({
   titleOriginal,
   image,
   viewingActivity,
   id,
-}: ShowWithViewingActivity) => {
+  uploadAllState,
+}: ShowWithViewingActivity & {
+  uploadAllState: ProcessorState["uploadAllState"];
+}) => {
   const [showStatus, changeShowStatus] = useState<CHANGE_STATUS_SHOW_STATES>(
     "INIT"
   );
@@ -61,6 +65,12 @@ export const ProcessedShow = ({
       setEpisodes(episodes);
     });
   }, []);
+
+  useEffect(() => {
+    if (uploadAllState === "UPLOADING_AS_IT_IS") {
+      handleOnMarkAsWatchClick();
+    }
+  }, [uploadAllState]);
 
   const handleOnMarkAsWatchClick = useCallback(() => {
     changeShowStatus("CHANGING");
@@ -85,6 +95,8 @@ export const ProcessedShow = ({
     });
   }, [episodes]);
 
+  const State = ProcessedShowStates[showStatus];
+
   return (
     <div className="show">
       <div className="show__content">
@@ -95,11 +107,11 @@ export const ProcessedShow = ({
         </div>
         <div className="show__buttons">
           <button
-            className="button show__check-btn"
+            className="button show__btn"
             onClick={handleOnMarkAsWatchClick}
           >
             <HoverLottieIcon
-              style={hoverIconStyle}
+              style={HOVER_ICON_STYLE}
               iconHeight="15px"
               iconWidth="15px"
               animationData={checkmarkLottieIcon}
@@ -107,13 +119,10 @@ export const ProcessedShow = ({
               Отметить шоу на MyShows
             </HoverLottieIcon>
           </button>
+          <a target="__blank" href={`${MY_SHOWS_SHOW_URL}${id}`} className="link show__btn">Открыть на MyShows</a>
         </div>
         <div className="show__state">
-          {showStatus === "CHANGING" && <ChangingState />}
-          {showStatus === "SUCCESS" &&
-            'Найденные серии помечены и статус шоу изменен на "Смотрю"'}
-          {showStatus === "FAILED" &&
-            "Что-то пошло не так. Возможно серии уже помечены как просмотренные."}
+          <State />
         </div>
       </div>
       <div className="show__status-color" />
@@ -136,9 +145,9 @@ export const ProcessedShow = ({
           color: var(--white);
         }
 
-        .show__check-btn {
-          height: 30px;
-          width: 210px;
+        .show__btn {
+          height: 100%;
+          width: 100%;
           margin-top: 5px;
           font-size: var(--font-size-s);
         }
@@ -188,6 +197,11 @@ export const ProcessedShow = ({
 
         .show__buttons {
           grid-area: buttons;
+          display: grid;
+          align-items: center;
+          grid-gap: 10px;
+          grid-template-columns: repeat(auto-fit, 210px);
+          grid-row: 30px;
         }
 
         .show::after {
