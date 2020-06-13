@@ -1,14 +1,15 @@
-import { MYSHOWS_API_URL, NETFLIX_NETWORK } from "./constants";
+import { MYSHOWS_API_URL, NETFLIX_NETWORK } from "../constants";
 
 import { Show, ShowWithViewingActivity } from "./types";
-import { viewingActivityContent } from "../viewingActivityParser/types";
+import { viewingActivityContent } from "../../viewingActivityParser/types";
+
 
 const prepareSearchRequestBody = (query: string) => {
   const data = {
     jsonrpc: "2.0",
     method: "shows.Search",
     params: {
-      query,
+      query
     },
     id: 1,
   };
@@ -21,8 +22,7 @@ const searchMyshows = async (query: string): Promise<Show[]> => {
     const response = await fetch(MYSHOWS_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.BEARERTESTCODE}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(reqBody),
     });
@@ -33,19 +33,19 @@ const searchMyshows = async (query: string): Promise<Show[]> => {
   }
 };
 
-const filterShows = (shows) => {
+const filterShows = (shows: Show[], query: string) => {
   const netflixShows =
     shows.length === 1
       ? shows
       : shows.filter(
-          (show) => !!show.network && show.network.title === NETFLIX_NETWORK
+          (show) => !!show.network && show.network.title === NETFLIX_NETWORK && show.titleOriginal === query
         );
   return netflixShows;
 };
 
 export const search = async (query: string): Promise<Show[]> => {
   const shows = await searchMyshows(query);
-  const netflixShows = filterShows(shows);
+  const netflixShows = filterShows(shows, query);
   return netflixShows;
 };
 
@@ -69,7 +69,7 @@ export const searchByChunks = async (
       const promises = chunks.map((chunk) => search(chunk.showTitle));
       Promise.all(promises).then((results) => {
         results.forEach((shows, index) => {
-          filterShows(shows).forEach((show) =>
+          filterShows(shows, chunks[index].showTitle).forEach((show) =>
             foundShows.push({ ...show, viewingActivity: { ...chunks[index] } })
           );
         });

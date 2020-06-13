@@ -6,8 +6,7 @@ import {
   SetViewingActivityContent,
   AddProcessedShow,
 } from "./types";
-import { viewingActivityContent } from "../../logic/viewingActivityParser/types";
-import { Show } from "../../logic/myshows/types";
+import { viewingActivityContent, Show, ShowWithViewingActivity } from "../../logic";
 
 export const setStatistic = (
   prop: SetStatistic["payload"]["prop"],
@@ -32,7 +31,7 @@ export const setViewingActivityContent = (
   payload,
 });
 
-export const addProcessedShow = (payload: Show): AddProcessedShow => ({
+export const addProcessedShow = (payload: ShowWithViewingActivity): AddProcessedShow => ({
   type: "ADD_PROCESSED_SHOW",
   payload,
 });

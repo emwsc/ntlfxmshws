@@ -37,6 +37,6 @@ export type SetViewingActivityContent = {
   type: "SET_VIEWING_ACTIVITY_CONTENT";
   payload: viewingActivityContent[];
 };
-export type AddProcessedShow = { type: "ADD_PROCESSED_SHOW", payload: Show };
+export type AddProcessedShow = { type: "ADD_PROCESSED_SHOW", payload: ShowWithViewingActivity };
 
 export type Action = SetStatistic | SwitchStage | SetViewingActivityContent | AddProcessedShow;

@@ -1,6 +1,6 @@
 import fetchMock from "fetch-mock";
-import { MYSHOWS_API_URL } from "../constants";
-import { search } from "../search";
+import { MYSHOWS_API_URL } from "../../constants";
+import { search } from "..";
 
 describe("myshows", () => {
   beforeEach(() => {

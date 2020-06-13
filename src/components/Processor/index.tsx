@@ -24,7 +24,8 @@ const ProcessorState = ({ children, current, max }: ProcessorStateProps) => (
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        width: 50vw;
+        width: 100%;
+        max-width: 900px;
         height: 120px;
         border-radius: 20px;
         box-shadow: 0 0.8px 2.2px rgba(0, 0, 0, 0.02),
@@ -165,35 +166,37 @@ export const Processor = ({ textContent }: ProcessorProps) => {
     });
   }, []);
 
-  console.log(processedShows)
-
   return (
     <div className="container">
       <ParsingState parsingStatistic={parsingStatistic} />
       {viewingActivityContent && (
-        <div className="processor">
-          <div className="processor__content">
-            <SearchingState
-              foundStatistic={foundStatistic}
-              searchingStatistic={searchingStatistic}
-              viewingActivityContent={viewingActivityContent}
-            />
-          </div>
-        </div>
+        <SearchingState
+          foundStatistic={foundStatistic}
+          searchingStatistic={searchingStatistic}
+          viewingActivityContent={viewingActivityContent}
+        />
       )}
-      {processedShows.length > 0 && <h2>Просмотренные шоу</h2>}
-      {processedShows.map((show) => (
-        <Fragment key={show.id}>
-          <ProcessedShow {...show} />
-        </Fragment>
-      ))}
+      {processedShows.length > 0 && (
+        <>
+          <h2>Найденные шоу</h2>
+          <button>Автоматически загрузить все данные о просмотренных шоу как получится</button>
+          <button>Пометить все как посмотренные целиком</button>
+          {processedShows.map((show) => (
+            <Fragment key={show.id}>
+              <ProcessedShow {...show} />
+            </Fragment>
+          ))}
+        </>
+      )}
       <style jsx>{`
         .container {
           display: grid;
           grid-template-columns: 1fr;
-          grid-template-rows: repeat(auto-fit, fit-content);
+          grid-template-rows: repeat(auto-fit, 120px);
           grid-gap: 10px;
           margin: 50px 0;
+          width: 100%;
+          justify-items: center;
         }
       `}</style>
     </div>

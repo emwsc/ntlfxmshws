@@ -6,4 +6,8 @@ dotenvLoad();
 
 const withNextEnv = nextEnv();
 
-module.exports = withNextEnv({})
+module.exports = withNextEnv({
+    publicRuntimeConfig: {
+        BEARERTESTCODE: process.env.BEARERTESTCODE
+    }
+})
