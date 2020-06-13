@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer, Fragment } from "react";
 
-import { ProcessedShow } from "./ProcessedShow";
+import { ProcessedShow } from "../ProcessedShow";
 
 import { ProcessorProps, State, ProcessorStateProps } from "./types";
 
@@ -179,8 +179,8 @@ export const Processor = ({ textContent }: ProcessorProps) => {
       {processedShows.length > 0 && (
         <>
           <h2>Найденные шоу</h2>
-          <button>Автоматически загрузить все данные о просмотренных шоу как получится</button>
-          <button>Пометить все как посмотренные целиком</button>
+          <button className="button button_inverse">Автоматически загрузить все данные о просмотренных шоу как получится</button>
+          <button className="button button_inverse">Пометить все как посмотренные целиком</button>
           {processedShows.map((show) => (
             <Fragment key={show.id}>
               <ProcessedShow {...show} />

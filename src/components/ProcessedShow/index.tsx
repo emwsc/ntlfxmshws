@@ -1,12 +1,21 @@
 import React, { useEffect, useState, useCallback } from "react";
 
-import { ShowWithViewingActivity, getShow, Episode } from "../../../logic";
-import { setShowStatus, syncEpisodes } from "../../../logic";
+import { LottieIcon } from "../LottieIcon";
+import { HoverLottieIcon } from "../HoverLottieIcon";
+
+import {
+  ShowWithViewingActivity,
+  getShow,
+  Episode,
+  setShowStatus,
+  syncEpisodes,
+} from "../../logic";
 
 import { CHANGE_STATUS_SHOW_STATES } from "./types";
 
 import acitivtyLottieIcon from "./assets/activity.json";
-import { LottieIcon } from "../../LottieIcon";
+import checkmarkLottieIcon from "./assets/checkmark.json";
+
 
 const STATUS_COLOR: {[key in CHANGE_STATUS_SHOW_STATES]: string} = {
   'INIT': 'transparent',
@@ -14,6 +23,12 @@ const STATUS_COLOR: {[key in CHANGE_STATUS_SHOW_STATES]: string} = {
   'SUCCESS': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(50,150,93,0.6446779395351891) 60%, rgba(50,150,93,1) 75%);',
   'FAILED': 'linear-gradient(90deg, rgba(247,203,21,0) 0%, rgba(229,9,20,1) 60%, rgba(229,9,20,1) 75%);'
 }
+
+const hoverIconStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
 
 const ChangingState = () => (
   <>
@@ -79,8 +94,18 @@ export const ProcessedShow = ({
           {episodes.length > 0 ? ` из ${episodes.length}` : ""}
         </div>
         <div className="show__buttons">
-          <button onClick={handleOnMarkAsWatchClick}>
-            Отметить все просмотренные эпизоды
+          <button
+            className="button show__check-btn"
+            onClick={handleOnMarkAsWatchClick}
+          >
+            <HoverLottieIcon
+              style={hoverIconStyle}
+              iconHeight="15px"
+              iconWidth="15px"
+              animationData={checkmarkLottieIcon}
+            >
+              Отметить шоу на MyShows
+            </HoverLottieIcon>
           </button>
         </div>
         <div className="show__state">
@@ -99,7 +124,7 @@ export const ProcessedShow = ({
           align-items: center;
           width: 100%;
           max-width: 900px;
-          height: 120px;
+          height: 140px;
           border-radius: 20px;
           box-shadow: 0 0.8px 2.2px rgba(0, 0, 0, 0.02),
             0 1.7px 5.3px rgba(0, 0, 0, 0.028),
@@ -111,6 +136,13 @@ export const ProcessedShow = ({
           color: var(--white);
         }
 
+        .show__check-btn {
+          height: 30px;
+          width: 210px;
+          margin-top: 5px;
+          font-size: var(--font-size-s);
+        }
+
         .show__icon {
           width: 30px;
           height: 30px;
@@ -120,8 +152,8 @@ export const ProcessedShow = ({
           position: relative;
           z-index: 2;
           display: grid;
-          grid-template-columns: 1fr 1fr 0.5fr;
-          grid-template-areas: "title buttons state" "episodes buttons state";
+          grid-template-columns: 1fr 0.5fr;
+          grid-template-areas: "title state" "episodes state" "buttons state";
           align-items: center;
           justify-content: space-between;
           width: 100%;

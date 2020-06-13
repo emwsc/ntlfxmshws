@@ -18,7 +18,7 @@ const Theme = () => (
           --bg-graish: #f4f8fe;
           --bluish: #b9d1f4;
           --netflix: #e50914;
-          --greenish: #32965D;
+          --greenish: #32965d;
           --font-size-xxl: 20px;
           --font-size-l: 16px;
           --font-size-m: 14px;
@@ -58,6 +58,35 @@ const Theme = () => (
 
         .bold {
           font-weight: bold;
+        }
+
+        .button {
+          border: none;
+          font-family: var(--font-normal);
+          background: var(--white);
+          font-weight: normal;
+          height: 30px;
+          border-radius: 5px;
+          border: 5px solid transparent;
+          transition: all 0.1s linear;
+        }
+
+        .button:focus {
+          border: 5px solid var(--bright-navy-blue);
+        }
+
+        .button:hover{
+          background: var(--bright-navy-blue);
+          color: var(--white);
+        }
+
+        .button::-moz-focus-inner {
+          border: 0;
+        }
+
+        .button_inverse {
+          background: #000;
+          color: var(--white);
         }
       `}
     </style>
