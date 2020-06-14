@@ -1,7 +1,7 @@
 import { MYSHOWS_API_URL } from "../constants";
 import { getToken } from '../../auth';
 
-import { SHOW_STATUSES } from "./types";
+import { SHOW_STATUSES } from "../types";
 
 const prepareSearchRequestBody = (showId: number, status: SHOW_STATUSES) => {
   const data = {

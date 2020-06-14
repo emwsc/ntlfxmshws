@@ -38,7 +38,9 @@ const DragBeforeUpload = () => {
         <span className="text text_centered">
           Viewing activity{" "}
           <img alt="Стрелочка вправо" src="/icons/arrow-right-s-fill.svg" />{" "}
-          download all
+          Выбрать профиль
+          <img alt="Стрелочка вправо" src="/icons/arrow-right-s-fill.svg" />{" "}
+          Внизу списка кнопка Download all
         </span>
         <span className="text">Просто перетащите файл в это окно</span>
       </p>

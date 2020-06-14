@@ -36,6 +36,7 @@ const ProcessContainer = ({ children, current, max }: ProcessorStateProps) => (
         position: relative;
         background: var(--graish);
         color: var(--white);
+        margin: 10px auto;
       }
 
       .processor__content {
@@ -194,7 +195,8 @@ export const Processor = ({ textContent }: ProcessorProps) => {
             потому что выгрузка из <span className="netflix bold">Netflix</span>{" "}
             не очень детально размечена. Так что как получится как получится.
             Если вы пометили сериал как "Перестал смотреть", то пометка будет
-            изменена на "Смотрю".
+            изменена на "Смотрю". Даже если вы смотрели шоу пол секунды, то оно
+            скорее всего будет в выгрузке.
           </p>
           <div className="buttons">
             <button
@@ -214,18 +216,19 @@ export const Processor = ({ textContent }: ProcessorProps) => {
       )}
       <style jsx>{`
         .container {
-          display: grid;
-          grid-template-columns: 1fr;
-          grid-template-rows: repeat(auto-fit, 120px);
-          grid-gap: 10px;
-          margin: 50px 0;
           width: 100%;
           justify-items: center;
+          align-items: center;
+          display: flex;
+          flex-direction: column;
+          max-width: 900px;
+          margin: 50px 0;
         }
 
         .disclaimer {
           max-width: 800px;
           text-align: center;
+          margin-bottom: 30px;
         }
 
         .buttons {

@@ -1,15 +1,17 @@
 import { MYSHOWS_API_URL, NETFLIX_NETWORK } from "../constants";
 
-import { Show, ShowWithViewingActivity } from "./types";
+import { Show, ShowWithViewingActivity } from "../types";
 import { viewingActivityContent } from "../../viewingActivityParser/types";
-
+import { showStatuses } from "../showStatuses";
+import { episodes } from "../episodes";
+import { getShow } from "../getShow";
 
 const prepareSearchRequestBody = (query: string) => {
   const data = {
     jsonrpc: "2.0",
     method: "shows.Search",
     params: {
-      query
+      query,
     },
     id: 1,
   };
@@ -22,7 +24,7 @@ const searchMyshows = async (query: string): Promise<Show[]> => {
     const response = await fetch(MYSHOWS_API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(reqBody),
     });
@@ -38,7 +40,10 @@ const filterShows = (shows: Show[], query: string) => {
     shows.length === 1
       ? shows
       : shows.filter(
-          (show) => !!show.network && show.network.title === NETFLIX_NETWORK && show.titleOriginal === query
+          (show) =>
+            !!show.network &&
+            show.network.title === NETFLIX_NETWORK &&
+            show.titleOriginal === query
         );
   return netflixShows;
 };
@@ -57,7 +62,7 @@ export const searchByChunks = async (
   return new Promise((resolve) => {
     const max = content.length;
     let current = 0;
-    const next = () => {
+    const next = async () => {
       if (content.length === 0) {
         return resolve();
       }
@@ -66,18 +71,28 @@ export const searchByChunks = async (
         0,
         content.length < 10 ? content.length : 10
       );
-      const promises = chunks.map((chunk) => search(chunk.showTitle));
-      Promise.all(promises).then((results) => {
-        results.forEach((shows, index) => {
-          filterShows(shows, chunks[index].showTitle).forEach((show) =>
-            foundShows.push({ ...show, viewingActivity: { ...chunks[index] } })
-          );
-        });
-        current += chunks.length;
-        onSearchProgress(current, max);
-        onFoundProgress(foundShows);
-        next();
+      const searchPromises = chunks.map((chunk) => search(chunk.showTitle));
+      const searchResults = await Promise.all(searchPromises);
+      searchResults.forEach((shows, index) => {
+        shows.forEach((show) =>
+          foundShows.push({ ...show, viewingActivity: { ...chunks[index] } })
+        );
       });
+      const showEpisodePromises = foundShows.map(show => getShow(show.id))
+      const profileEpisodesPromises = foundShows.map(show => episodes(show.id))
+      const profileEpisodes = await Promise.all(profileEpisodesPromises);
+      const statuses = await showStatuses(foundShows.map((show) => show.id));
+      const showEpisodes = await Promise.all(showEpisodePromises);
+      foundShows.forEach((show, index) => {
+        const status = statuses.find(({ showId }) => show.id === showId);
+        show.status = status ? status.watchStatus : "none";
+        show.profileEpisodes = profileEpisodes[index]
+        show.episodes = showEpisodes[index].episodes;
+      })
+      current += chunks.length;
+      onSearchProgress(current, max);
+      onFoundProgress(foundShows);
+      next();
     };
     next();
   });

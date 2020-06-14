@@ -1,1 +1,0 @@
-export type SHOW_STATUSES = 'watching';

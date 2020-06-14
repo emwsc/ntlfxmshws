@@ -5,18 +5,50 @@ import { HoverLottieIcon } from "../HoverLottieIcon";
 
 import {
   ShowWithViewingActivity,
-  getShow,
-  Episode,
   setShowStatus,
   syncEpisodes,
+  Episode,
 } from "../../logic";
-import { HOVER_ICON_STYLE, STATUS_COLOR, MY_SHOWS_SHOW_URL } from "./constants";
+import { HOVER_ICON_STYLE, STATUS_COLOR, MY_SHOWS_SHOW_URL, MY_SHOWS_WATCHING_STATUS } from "./constants";
 
 import { CHANGE_STATUS_SHOW_STATES } from "./types";
 import { ProcessorState } from "../Processor/types";
 
 import acitivtyLottieIcon from "./assets/activity.json";
 import checkmarkLottieIcon from "./assets/checkmark.json";
+
+const compareEpisodeTitles = (title: string, seasonNumber: number, ep: Episode) => {
+  const sameTitle = title === ep.title;
+  if (sameTitle) {
+    return true;
+  }
+  try {
+    const episodeNumber = parseInt(title.toLowerCase().replace("episode", "").trim());
+    return ep.episodeNumber === episodeNumber && ep.seasonNumber === seasonNumber;
+  } catch (e) {
+    return false;
+  }
+};
+
+const findNotMarkedEpisodes = (
+  viewingActivity: ShowWithViewingActivity["viewingActivity"],
+  myShowsEpisodes: ShowWithViewingActivity["episodes"],
+  profileEpisodes: ShowWithViewingActivity["profileEpisodes"]
+) => {
+  return myShowsEpisodes.filter((myShowsEpisode) => {
+    const alreadyWatched = !!profileEpisodes.find(
+      (watchedEpisode) => watchedEpisode.id === myShowsEpisode.id
+    );
+    if (alreadyWatched) {
+      return false;
+    }
+    return viewingActivity.seasons.some(({ episodes, number }) => {
+      return episodes.some((title) =>
+        compareEpisodeTitles(title, number, myShowsEpisode)
+      );
+    });
+  });
+};
 
 const ChangingState = () => (
   <>
@@ -26,6 +58,7 @@ const ChangingState = () => (
     </div>
   </>
 );
+
 
 const ProcessedShowStates: { [key in CHANGE_STATUS_SHOW_STATES]: React.FC } = {
   INIT: () => null,
@@ -38,6 +71,18 @@ const ProcessedShowStates: { [key in CHANGE_STATUS_SHOW_STATES]: React.FC } = {
       Что-то пошло не так. Возможно серии уже помечены как просмотренные.
     </span>
   ),
+  EPISODES_NOT_MATCHING: () => (
+    <span>
+      Названия эпизодов на <span className="bold">Netflix</span> не совпадают с
+      названиями на MyShows либо просмотренные эпизоды уже отмечены
+    </span>
+  ),
+  SAME_WATCHED_COUNT: () => (
+    <span>
+      Количество просмотренных на <span className="netflix">Netflix</span>{" "}
+      совпадает с количеством просмотренных на MyShows
+    </span>
+  ),
 };
 
 export const ProcessedShow = ({
@@ -46,6 +91,9 @@ export const ProcessedShow = ({
   viewingActivity,
   id,
   uploadAllState,
+  status,
+  episodes,
+  profileEpisodes,
 }: ShowWithViewingActivity & {
   uploadAllState: ProcessorState["uploadAllState"];
 }) => {
@@ -53,18 +101,10 @@ export const ProcessedShow = ({
     "INIT"
   );
 
-  const [episodes, setEpisodes] = useState<Episode[]>([]);
-
   const viewedEpisodes = viewingActivity.seasons.reduce(
     (total, season) => [...total, ...season.episodes],
     []
   );
-
-  useEffect(() => {
-    getShow(id).then(({ episodes }) => {
-      setEpisodes(episodes);
-    });
-  }, []);
 
   useEffect(() => {
     if (uploadAllState === "UPLOADING_AS_IT_IS") {
@@ -72,28 +112,30 @@ export const ProcessedShow = ({
     }
   }, [uploadAllState]);
 
-  const handleOnMarkAsWatchClick = useCallback(() => {
+  const handleOnMarkAsWatchClick = useCallback(async () => {
     changeShowStatus("CHANGING");
-    const onError = () => changeShowStatus("FAILED");
-    const foundEpisodes = episodes.filter((ep) =>
-      viewedEpisodes.some((title) => title === ep.title)
-    );
-    if (foundEpisodes.length === 0) {
-      return onError();
+    if (viewedEpisodes.length === profileEpisodes.length) {
+      return changeShowStatus("SAME_WATCHED_COUNT");
     }
-    syncEpisodes(
+    const notMarkedEpisodes = findNotMarkedEpisodes(
+      viewingActivity,
+      episodes,
+      profileEpisodes
+    );
+    if (notMarkedEpisodes.length === 0) {
+      return changeShowStatus("EPISODES_NOT_MATCHING");
+    }
+    const syncEpisodesSuccess = await syncEpisodes(
       id,
-      foundEpisodes.map((ep) => ep.id)
-    ).then((result) => {
-      if (!result) {
-        changeShowStatus("FAILED");
-        return;
-      }
-      setShowStatus(id, "watching").then((result) => {
-        changeShowStatus(result ? "SUCCESS" : "FAILED");
-      });
-    });
-  }, [episodes]);
+      notMarkedEpisodes.map((ep) => ep.id)
+    );
+    if (!syncEpisodesSuccess) {
+      changeShowStatus("FAILED");
+      return;
+    }
+    const setShowStatusSuccess = await setShowStatus(id, "watching");
+    changeShowStatus(setShowStatusSuccess ? "SUCCESS" : "FAILED");
+  }, []);
 
   const State = ProcessedShowStates[showStatus];
 
@@ -102,8 +144,18 @@ export const ProcessedShow = ({
       <div className="show__content">
         <div className="title show__title">{titleOriginal}</div>
         <div className="text show__episodes">
-          Просмотрено эпизодов {viewedEpisodes.length}
-          {episodes.length > 0 ? ` из ${episodes.length}` : ""}
+          <p className="text">
+            Просмотрено эпизодов на{" "}
+            <span className="netflix bold">Netflix</span>{" "}
+            {viewedEpisodes.length}.
+          </p>
+          <p className="text">
+            Просмотрено эпизодов на MyShows {profileEpisodes.length} из{" "}
+            {episodes.length}.
+          </p>
+        </div>
+        <div className="show__myshows-state">
+          {MY_SHOWS_WATCHING_STATUS[status]}
         </div>
         <div className="show__buttons">
           <button
@@ -116,10 +168,16 @@ export const ProcessedShow = ({
               iconWidth="15px"
               animationData={checkmarkLottieIcon}
             >
-              Отметить шоу на MyShows
+              Отметить эпизоды на MyShows
             </HoverLottieIcon>
           </button>
-          <a target="__blank" href={`${MY_SHOWS_SHOW_URL}${id}`} className="link show__btn">Открыть на MyShows</a>
+          <a
+            target="__blank"
+            href={`${MY_SHOWS_SHOW_URL}${id}`}
+            className="link show__btn"
+          >
+            Открыть на MyShows
+          </a>
         </div>
         <div className="show__state">
           <State />
@@ -133,7 +191,7 @@ export const ProcessedShow = ({
           align-items: center;
           width: 100%;
           max-width: 900px;
-          height: 140px;
+          height: 200px;
           border-radius: 20px;
           box-shadow: 0 0.8px 2.2px rgba(0, 0, 0, 0.02),
             0 1.7px 5.3px rgba(0, 0, 0, 0.028),
@@ -143,6 +201,7 @@ export const ProcessedShow = ({
           position: relative;
           background-color: var(--graish);
           color: var(--white);
+          margin: 10px auto;
         }
 
         .show__btn {
@@ -162,7 +221,7 @@ export const ProcessedShow = ({
           z-index: 2;
           display: grid;
           grid-template-columns: 1fr 0.5fr;
-          grid-template-areas: "title state" "episodes state" "buttons state";
+          grid-template-areas: "title state" "episodes state" "myshows state" "buttons state";
           align-items: center;
           justify-content: space-between;
           width: 100%;
@@ -170,6 +229,12 @@ export const ProcessedShow = ({
           box-sizing: border-box;
           border-radius: 20px;
           height: 100%;
+        }
+
+        .show__myshows-state {
+          grid-are: myshows;
+          width: fit-content;
+          font-size: var(--font-size-s);
         }
 
         .show__status-color {
@@ -186,6 +251,7 @@ export const ProcessedShow = ({
 
         .show__episodes {
           grid-area: episodes;
+          font-size: var(--font-size-s);
         }
         .show__state {
           grid-area: state;
@@ -200,7 +266,7 @@ export const ProcessedShow = ({
           display: grid;
           align-items: center;
           grid-gap: 10px;
-          grid-template-columns: repeat(auto-fit, 210px);
+          grid-template-columns: repeat(auto-fit, 240px);
           grid-row: 30px;
         }
 
@@ -217,7 +283,7 @@ export const ProcessedShow = ({
           background-size: cover;
           background-position: top;
           background-repeat: no-repeat;
-          opacity: 0.45;
+          opacity: 0.25;
         }
       `}</style>
     </div>
