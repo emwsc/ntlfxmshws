@@ -1,10 +1,7 @@
-import getConfig from 'next/config'
-
 import { MYSHOWS_API_URL } from "../constants";
+import { getToken } from '../../auth';
 
 import { SHOW_STATUSES } from "./types";
-
-const { publicRuntimeConfig } = getConfig()
 
 const prepareSearchRequestBody = (showId: number, status: SHOW_STATUSES) => {
   const data = {
@@ -26,7 +23,7 @@ export const setShowStatus = async (showId: number, status: SHOW_STATUSES): Prom
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${publicRuntimeConfig.BEARERTESTCODE}`,
+        Authorization: `Bearer ${getToken().access_token}`,
       },
       body: JSON.stringify(reqBody),
     });

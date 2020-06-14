@@ -30,7 +30,6 @@ const DragBeforeUpload = () => {
           <a
             onClick={onLinkClick}
             target="__blank"
-            className="link"
             href="https://www.netflix.com/YourAccount"
           >
             настроек аккаунта

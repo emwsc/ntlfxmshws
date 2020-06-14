@@ -8,6 +8,7 @@ const withNextEnv = nextEnv();
 
 module.exports = withNextEnv({
     publicRuntimeConfig: {
-        BEARERTESTCODE: process.env.BEARERTESTCODE
+        CLIENTID: process.env.CLIENTID,
+        CLIENTSECRET: process.env.CLIENTSECRET
     }
 })

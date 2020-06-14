@@ -1,8 +1,5 @@
-import getConfig from 'next/config'
-
 import { MYSHOWS_API_URL } from "../constants";
-
-const { publicRuntimeConfig } = getConfig()
+import { getToken } from '../../auth';
 
 const prepareSearchRequestBody = (showId: number, episodes: number[]) => {
   const data = {
@@ -13,7 +10,7 @@ const prepareSearchRequestBody = (showId: number, episodes: number[]) => {
       episodeIds: episodes,
     },
     id: 1,
-  };
+  };     
   return data;
 };
 
@@ -24,7 +21,7 @@ export const syncEpisodes = async (showId: number, episodes: number[]): Promise<
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${publicRuntimeConfig.BEARERTESTCODE}`,
+        Authorization: `Bearer ${getToken().access_token}`,
       },
       body: JSON.stringify(reqBody),
     });
