@@ -6,10 +6,12 @@ import { loginIntoMyshows, saveToken } from "../../logic";
 import loginLottieIcon from "./assets/login.json";
 import { LottieIcon } from "../LottieIcon";
 
+import { AuthFormHtmlElement } from "./types";
+
 export const AuthForm = () => {
   const [disabled, setDisabled] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const handleLogin = useCallback(async (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = useCallback(async (event: FormEvent<AuthFormHtmlElement>) => {
     event.preventDefault();
     setDisabled(true);
     const { loginEl, pwdEl } = event.currentTarget.elements;
