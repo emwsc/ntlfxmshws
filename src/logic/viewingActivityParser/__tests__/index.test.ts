@@ -16,7 +16,7 @@ const textContent = `Title,Date
     `;
 
 describe("viewingActivityParser", () => {
-  it("parse succesful", () => {
+  it("should parse succesful", () => {
     const expectedResult = {
       content: [
         {
@@ -74,12 +74,12 @@ describe("viewingActivityParser", () => {
     expect(parseResult).toEqual(expectedResult);
   });
 
-  it("parse failed", () => {
+  it("should parse failed", () => {
     const parseResult = parse(undefined);
     expect(parseResult).toEqual({ status: "ERROR", content: [] });
   });
 
-  it("parse by chunks success", () => {
+  it("should parse by chunks success", () => {
     const expectedResult = {
       content: [
         {

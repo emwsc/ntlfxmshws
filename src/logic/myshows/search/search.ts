@@ -54,18 +54,15 @@ export const search = async (query: string): Promise<Show[]> => {
   return netflixShows;
 };
 
-export const searchByChunks = async (
+export const detailedSearchByChunks = async (
   content: viewingActivityContent[],
   onSearchProgress: (current: number, max: number) => void,
   onFoundProgress: (shows: ShowWithViewingActivity[]) => void
 ): Promise<void> => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve, reject) => {
     const max = content.length;
     let current = 0;
-    const next = async () => {
-      if (content.length === 0) {
-        return resolve();
-      }
+    const next = async (): Promise<boolean> => {
       const foundShows: ShowWithViewingActivity[] = [];
       const chunks = content.splice(
         0,
@@ -78,22 +75,36 @@ export const searchByChunks = async (
           foundShows.push({ ...show, viewingActivity: { ...chunks[index] } })
         );
       });
-      const showEpisodePromises = foundShows.map(show => getShow(show.id))
-      const profileEpisodesPromises = foundShows.map(show => episodes(show.id))
+      const showEpisodePromises = foundShows.map((show) => getShow(show.id));
+      const showEpisodes = await Promise.all(showEpisodePromises);
+      const profileEpisodesPromises = foundShows.map((show) =>
+        episodes(show.id)
+      );
       const profileEpisodes = await Promise.all(profileEpisodesPromises);
       const statuses = await showStatuses(foundShows.map((show) => show.id));
-      const showEpisodes = await Promise.all(showEpisodePromises);
       foundShows.forEach((show, index) => {
         const status = statuses.find(({ showId }) => show.id === showId);
         show.status = status ? status.watchStatus : "none";
-        show.profileEpisodes = profileEpisodes[index]
+        show.profileEpisodes = profileEpisodes[index];
         show.episodes = showEpisodes[index].episodes;
-      })
+      });
       current += chunks.length;
       onSearchProgress(current, max);
       onFoundProgress(foundShows);
-      next();
+      return true;
     };
-    next();
+    while (true) {
+      try {
+        const success = await next();
+        if (!success) {
+          return reject("not success");
+        }
+        if (content.length === 0) {
+          return resolve();
+        }
+      } catch (e) {
+        return reject(e);
+      }
+    }
   });
 };

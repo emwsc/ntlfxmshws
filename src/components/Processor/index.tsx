@@ -4,7 +4,7 @@ import { ProcessedShow } from "../ProcessedShow";
 
 import { ProcessorProps, ProcessorState, ProcessorStateProps } from "./types";
 
-import { parseChunking, searchByChunks } from "../../logic";
+import { parseChunking, detailedSearchByChunks } from "../../logic";
 import {
   setStatistic,
   switchStage,
@@ -150,7 +150,7 @@ export const Processor = ({ textContent }: ProcessorProps) => {
       dispatch(switchStage("SEARCHING"));
       let foundShowsCount = 0;
       let maxShow = content.length;
-      searchByChunks(
+      detailedSearchByChunks(
         [...content],
         (current, max) => {
           dispatch(setStatistic("searchingStatistic", { current, max }));
